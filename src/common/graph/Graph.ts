@@ -55,7 +55,25 @@ export class Graph {
      * @returns 相邻节点数组
      */
     getNeighbors(node: GraphNode): GraphNode[] {
-        return node.edges.map((edge) => edge.node);
+        const neighbors: GraphNode[] = node.edges.map((edge) => edge.node);
+        if ((node.location.x + node.location.y) % 2 === 0) {
+            neighbors.reverse();
+        }
+        return neighbors;
+    }
+
+    /**
+     * 获取两个节点之间的边成本
+     * @param node 起始节点
+     * @param neighbor 目标节点
+     * @returns 边成本或0（如果不存在）
+     */
+    getCost(node: GraphNode, neighbor: GraphNode): number {
+        const edge = this.getEdge(node, neighbor);
+        if (edge) {
+            return edge.cost;
+        }
+        return 0;
     }
 
     /**

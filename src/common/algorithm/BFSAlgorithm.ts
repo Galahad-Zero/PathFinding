@@ -1,6 +1,6 @@
 import { stringifyLocation } from '../graph/Graph';
 import { Algorithm, PathFlowGraph } from './Algorithm';
-import { GraphNode, Location } from '../graph/GraphTypes';
+import { GraphNode, Location, LocationIsEqual } from '../graph/GraphTypes';
 import Queue from '../queue/Queue';
 
 export default class BFSAlgorithm extends Algorithm {
@@ -11,7 +11,7 @@ export default class BFSAlgorithm extends Algorithm {
         const cameFrom: Record<string, string | null> = {
             [stringifyLocation(start)]: null,
         };
-
+        this.foundPath = [];
         try {
             const startNode = this.graph.getNode(start);
             if (!startNode) {
@@ -30,10 +30,12 @@ export default class BFSAlgorithm extends Algorithm {
                 const current = queue.get();
                 if (!current) {
                     throw new Error('Current node not found');
-                } else if (current.location === goal) {
+                } else if (LocationIsEqual(current.location, goal)) {
                     // 如果当前节点是目标节点，则退出
                     break;
                 }
+                this.foundPath.push(current);
+
                 const neighbors = this.graph.getNeighbors(current);
 
                 // 对邻居节点进行排序, 启发式值越小越靠前

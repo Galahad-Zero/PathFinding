@@ -1,7 +1,7 @@
 import { stringifyLocation } from '../graph/Graph';
 import PriorityQueue from '../queue/PriorityQueue';
 import { Algorithm, PathFlowGraph } from './Algorithm';
-import { GraphNode, Location } from '../graph/GraphTypes';
+import { GraphNode, Location, LocationIsEqual } from '../graph/GraphTypes';
 
 export default class DijkstraAlgorithm extends Algorithm {
     protected algorithmInfo: string =
@@ -16,7 +16,7 @@ export default class DijkstraAlgorithm extends Algorithm {
         const costSoFar: Record<string, number> = {
             [stringifyLocation(start)]: 0,
         };
-
+        this.foundPath = [];
         try {
             const startNode = this.graph.getNode(start);
             if (!startNode) {
@@ -38,9 +38,10 @@ export default class DijkstraAlgorithm extends Algorithm {
                 if (!current) {
                     throw new Error('Current node not found');
                 }
-                if (current.location === goal) {
+                if (LocationIsEqual(current.location, goal)) {
                     break;
                 }
+                this.foundPath.push(current);
                 // 获取当前节点的位置
                 const currentNodeKey = stringifyLocation(current.location);
                 // 遍历当前节点的所有邻居
@@ -50,26 +51,17 @@ export default class DijkstraAlgorithm extends Algorithm {
                         neighbor.node.location
                     );
                     // 计算新的路径成本
-                    const newCost = costSoFar[currentNodeKey] + neighbor.cost;
+                    const newCost =
+                        costSoFar[currentNodeKey] +
+                        this.getHeuristic(current, neighbor.node);
                     // 获取当前节点的路径成本
                     const currentCost = costSoFar[neighborNodeKey];
                     // 如果当前节点没有路径，或者新的路径更短，则更新路径
-                    // if (!currentCost || newCost < currentCost) {
-                    //     // 更新路径成本
-                    //     costSoFar[neighborNodeKey] = newCost;
-                    //     // 更新优先级
-                    //     const priority = newCost;
-                    //     // 将邻居节点加入队列
-                    //     frontier.put(neighbor.node, priority);
-                    //     // 记录路径流向
-                    //     cameFrom[neighborNodeKey] = currentNodeKey;
-                    // }
-                    if (!cameFrom[neighborNodeKey]) {
-                        // costSoFar[neighborNodeKey] = newCost;
+                    if (!currentCost || newCost < currentCost) {
+                        // 更新路径成本
+                        costSoFar[neighborNodeKey] = newCost;
                         // 更新优先级
-                        const priority =
-                            this.getHeuristic(neighbor.node, goalNode) +
-                            newCost;
+                        const priority = newCost;
                         // 将邻居节点加入队列
                         frontier.put(neighbor.node, priority);
                         // 记录路径流向
@@ -120,7 +112,9 @@ export default class DijkstraAlgorithm extends Algorithm {
                         neighbor.node.location
                     );
                     // 计算新的路径成本
-                    const newCost = costSoFar[currentNodeKey] + neighbor.cost;
+                    const newCost =
+                        costSoFar[currentNodeKey] +
+                        this.getHeuristic(current, neighbor.node);
                     // 获取当前节点的路径成本
                     const currentCost = costSoFar[neighborNodeKey];
                     // 如果当前节点没有路径，或者新的路径更短，则更新路径
@@ -143,5 +137,28 @@ export default class DijkstraAlgorithm extends Algorithm {
 
         // 返回构建好的路径流向图
         return pathFlowGraph;
+    }
+
+    protected getHeuristic(node1: GraphNode, node2: GraphNode): number {
+        const { x, y } = node1.location;
+        let cost = this.graph.getCost(node1, node2);
+        if ((x + y) % 2 === 0) {
+            // 如果node1到node2是水平移动，则cost+1
+            if (
+                Math.abs(node1.location.x - node2.location.x) > 0 &&
+                node1.location.y === node2.location.y
+            ) {
+                cost += 1;
+            }
+        } else {
+            // 如果node1到node2是垂直移动，则cost+1
+            if (
+                Math.abs(node1.location.y - node2.location.y) > 0 &&
+                node1.location.x === node2.location.x
+            ) {
+                cost += 1;
+            }
+        }
+        return cost;
     }
 }

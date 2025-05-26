@@ -31,10 +31,11 @@ function getInitGraph(width: number, height: number): Graph {
         for (let x = 0; x < width; x++) {
             const currentNode = nodes[y][x];
 
-            // 向上
-            if (y > 0) {
-                graph.addEdge(currentNode, nodes[y - 1][x], 1);
+            // 向右
+            if (x + 1 < width) {
+                graph.addEdge(currentNode, nodes[y][x + 1], 1);
             }
+
             // 向左
             if (x > 0) {
                 graph.addEdge(currentNode, nodes[y][x - 1], 1);
@@ -45,9 +46,9 @@ function getInitGraph(width: number, height: number): Graph {
                 graph.addEdge(currentNode, nodes[y + 1][x], 1);
             }
 
-            // 向右
-            if (x + 1 < width) {
-                graph.addEdge(currentNode, nodes[y][x + 1], 1);
+            // 向上
+            if (y > 0) {
+                graph.addEdge(currentNode, nodes[y - 1][x], 1);
             }
         }
     }
@@ -68,6 +69,9 @@ export default function App(): JSX.Element {
         y: number;
     } | null>(null);
     const [path, setPath] = React.useState<Array<{ x: number; y: number }>>([]);
+    const [foundPath, setFoundPath] = React.useState<
+        Array<{ x: number; y: number }>
+    >([]);
     const [pathFlowGraph, setPathFlowGraph] = React.useState<PathFlowGraph>(
         new Map()
     );
@@ -104,6 +108,7 @@ export default function App(): JSX.Element {
                     selectedGoal
                 );
                 setPath(nodes.map((node) => node.location));
+                setFoundPath(algorithm.foundPath.map((node) => node.location));
                 setPathFlowGraph(algorithm.getPathFlowGraph(selectedStart));
             } catch (error) {
                 console.error('路径查找失败:', error);

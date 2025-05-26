@@ -15,6 +15,7 @@ export type PathFlowGraph = Map<string, Location>;
 export abstract class Algorithm {
     // 算法描述
     protected abstract algorithmInfo: string;
+    public foundPath: GraphNode[] = [];
 
     // 绑定图
     constructor(protected graph: Graph, protected heuristic: boolean = false) {}
@@ -92,13 +93,10 @@ export abstract class Algorithm {
      * @returns 启发式值
      */
     protected getHeuristic(node1: GraphNode, node2: GraphNode): number {
-        if (this.heuristic) {
-            return (
-                Math.abs(node1.location.x - node2.location.x) +
-                Math.abs(node1.location.y - node2.location.y)
-            );
-        }
-        return 0;
+        return (
+            Math.abs(node1.location.x - node2.location.x) +
+            Math.abs(node1.location.y - node2.location.y)
+        );
     }
 
     /**
