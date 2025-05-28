@@ -1,47 +1,39 @@
 import { Graph } from '../graph/Graph';
 import { Algorithm } from './Algorithm';
 import BFSAlgorithm from './BFSAlgorithm';
+import GBFSAlgorithm from './GBFSAlgorithm';
 import DijkstraAlgorithm from './DijkstraAlgorithm';
+import AStarAlgorithm from './AStarAlgorithm';
 
 export enum AlgorithmType {
     BFS = 'BFS',
     Dijkstra = 'Dijkstra',
-    // AStar = 'AStar',
+    GBFS = 'GBFS',
+    AStar = 'AStar',
 }
 
 export const AlgorithmClass = {
     [AlgorithmType.BFS]: BFSAlgorithm,
     [AlgorithmType.Dijkstra]: DijkstraAlgorithm,
-    // [AlgorithmType.AStar]: 'AStar',
+    [AlgorithmType.GBFS]: GBFSAlgorithm,
+    [AlgorithmType.AStar]: AStarAlgorithm,
 } as const;
 
 export class AlgorithmFactory {
     private static _instance: AlgorithmFactory;
     private _algorithmCache: Map<AlgorithmType, Algorithm> = new Map();
 
-    static createAlgorithm(
-        algorithmType: AlgorithmType,
-        graph: Graph,
-        heuristic: boolean = false
-    ) {
+    static createAlgorithm(algorithmType: AlgorithmType, graph: Graph) {
         const factory = AlgorithmFactory.getInstance();
-        return factory._getAlgorithm(algorithmType, graph, heuristic);
+        return factory._getAlgorithm(algorithmType, graph);
     }
 
-    private _getAlgorithm(
-        algorithmType: AlgorithmType,
-        graph: Graph,
-        heuristic: boolean
-    ) {
+    private _getAlgorithm(algorithmType: AlgorithmType, graph: Graph) {
         const algorithm = this._algorithmCache.get(algorithmType);
         if (algorithm) {
-            algorithm.setHeuristic(heuristic);
             return algorithm;
         }
-        const newAlgorithm = new AlgorithmClass[algorithmType](
-            graph,
-            heuristic
-        );
+        const newAlgorithm = new AlgorithmClass[algorithmType](graph);
         this._algorithmCache.set(algorithmType, newAlgorithm);
         return newAlgorithm;
     }

@@ -4,12 +4,14 @@ interface InfoPanelProps {
     selectedStart: { x: number; y: number } | null;
     selectedGoal: { x: number; y: number } | null;
     path: Array<{ x: number; y: number }>;
+    foundPath: Array<{ x: number; y: number }>;
 }
 
 export default function InfoPanel({
     selectedStart,
     selectedGoal,
     path,
+    foundPath,
 }: InfoPanelProps): JSX.Element {
     return (
         <div className="info-panel">
@@ -29,6 +31,11 @@ export default function InfoPanel({
                 {path.length > 0 && (
                     <div className="info-item">
                         找到路径！长度: {path.length}
+                    </div>
+                )}
+                {foundPath.length > 0 && (
+                    <div className="info-item">
+                        查找过的网格数: {foundPath.length}
                     </div>
                 )}
             </div>

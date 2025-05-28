@@ -8,8 +8,6 @@ interface ControlPanelProps {
     onShowPathFlowChange: (show: boolean) => void;
     currentAlgorithm: AlgorithmType;
     onCurrentAlgorithmChange: (algorithm: AlgorithmType) => void;
-    heuristic: boolean;
-    onHeuristicChange: (heuristic: boolean) => void;
 }
 
 export default function ControlPanel({
@@ -19,8 +17,6 @@ export default function ControlPanel({
     onShowPathFlowChange,
     currentAlgorithm,
     onCurrentAlgorithmChange,
-    heuristic,
-    onHeuristicChange,
 }: ControlPanelProps): JSX.Element {
     const allAlgorithms = Object.values(AlgorithmType);
     return (
@@ -47,16 +43,6 @@ export default function ControlPanel({
                             }
                         />
                         流向图
-                    </label>
-                    <label className="control-label">
-                        <input
-                            type="checkbox"
-                            checked={heuristic}
-                            onChange={(e) =>
-                                onHeuristicChange(e.target.checked)
-                            }
-                        />
-                        启发式
                     </label>
                 </div>
                 <div className="control-item">

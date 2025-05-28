@@ -8,27 +8,25 @@ export default class PriorityQueue<T> {
     }
 
     put(item: T, priority: number): void {
-        this.items.push({ item, priority });
-        // 使用插入排序，根据优先级插入到正确位置
+        // 如果元素已存在，则更新优先级
+        // const itemIndex = this.items.findIndex((cur) => cur.item === item);
         const newItem = { item, priority };
-        let insertIndex = this.items.length - 1;
+        // if (itemIndex !== -1) {
+        //     newItem = this.items.splice(itemIndex, 1)[0];
+        // }
 
-        // 找到正确的插入位置
-        for (let i = this.items.length - 2; i >= 0; i--) {
-            const shouldInsertBefore = this._smallPriority
-                ? priority < this.items[i].priority
-                : priority > this.items[i].priority;
+        // 使用插入排序，根据优先级插入到正确位置
+        const insertIndex = this.items.findIndex((cur) => {
+            return this._smallPriority
+                ? priority < cur.priority
+                : priority > cur.priority;
+        });
 
-            if (shouldInsertBefore) {
-                insertIndex = i;
-            } else {
-                break;
-            }
+        if (insertIndex === -1) {
+            this.items.push(newItem);
+        } else {
+            this.items.splice(insertIndex, 0, newItem);
         }
-
-        // 将新元素插入到正确位置
-        this.items.splice(insertIndex, 0, newItem);
-        this.items.pop(); // 移除最后添加的元素，因为我们已经在正确位置插入了
     }
 
     isEmpty(): boolean {

@@ -18,7 +18,7 @@ export abstract class Algorithm {
     public foundPath: GraphNode[] = [];
 
     // 绑定图
-    constructor(protected graph: Graph, protected heuristic: boolean = false) {}
+    constructor(protected graph: Graph) {}
 
     /**
      * 获取算法描述
@@ -29,7 +29,7 @@ export abstract class Algorithm {
     }
 
     /**
-     * 回溯路径
+     * 回溯路径，从终点到起点
      * @param cameFrom 路径流向图
      * @param startNode 起点
      * @param goalNode 终点
@@ -77,14 +77,14 @@ export abstract class Algorithm {
      * @param goal 终点
      * @returns 路径，从起点到终点
      */
-    abstract findNearestPath(start: Location, goal: Location): GraphNode[];
+    abstract findNearestPath(_start: Location, _goal: Location): GraphNode[];
 
     /**
      * 获取路径流向图
      * @param start 起点
      * @returns 路径流向图, 所有节点的路径流向
      */
-    abstract getPathFlowGraph(start: Location): PathFlowGraph;
+    abstract getPathFlowGraph(_start: Location): PathFlowGraph;
 
     /**
      * 获取启发式值
@@ -97,13 +97,5 @@ export abstract class Algorithm {
             Math.abs(node1.location.x - node2.location.x) +
             Math.abs(node1.location.y - node2.location.y)
         );
-    }
-
-    /**
-     * 设置启发式开关
-     * @param heuristic 启发式
-     */
-    public setHeuristic(heuristic: boolean) {
-        this.heuristic = heuristic;
     }
 }

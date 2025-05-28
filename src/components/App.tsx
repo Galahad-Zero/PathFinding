@@ -80,7 +80,6 @@ export default function App(): JSX.Element {
     >(null);
     const [showWeights, setShowWeights] = React.useState(true);
     const [showPathFlow, setShowPathFlow] = React.useState(false);
-    const [heuristic, setHeuristic] = React.useState(false);
     const [currentAlgorithm, setCurrentAlgorithm] =
         React.useState<AlgorithmType>(AlgorithmType.BFS);
     const [lastDragCell, setLastDragCell] = React.useState<{
@@ -99,8 +98,7 @@ export default function App(): JSX.Element {
         if (selectedStart && selectedGoal) {
             const algorithm = AlgorithmFactory.createAlgorithm(
                 currentAlgorithm,
-                graph,
-                heuristic
+                graph
             );
             try {
                 const nodes = algorithm.findNearestPath(
@@ -187,8 +185,6 @@ export default function App(): JSX.Element {
                 onShowPathFlowChange={setShowPathFlow}
                 currentAlgorithm={currentAlgorithm}
                 onCurrentAlgorithmChange={setCurrentAlgorithm}
-                heuristic={heuristic}
-                onHeuristicChange={setHeuristic}
             />
             <GridArea
                 graph={graph}
@@ -212,6 +208,7 @@ export default function App(): JSX.Element {
                 selectedStart={selectedStart}
                 selectedGoal={selectedGoal}
                 path={path}
+                foundPath={foundPath}
             />
         </div>
     );
