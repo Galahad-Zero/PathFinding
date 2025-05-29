@@ -193,6 +193,7 @@ export default function App(): JSX.Element {
                 selectedStart={selectedStart}
                 selectedGoal={selectedGoal}
                 path={path}
+                foundPath={foundPath}
                 pathFlowGraph={pathFlowGraph}
                 showWeights={showWeights}
                 showPathFlow={showPathFlow}

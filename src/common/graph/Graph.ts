@@ -56,9 +56,9 @@ export class Graph {
      */
     getNeighbors(node: GraphNode): GraphNode[] {
         const neighbors: GraphNode[] = node.edges.map((edge) => edge.node);
-        // if ((node.location.x + node.location.y) % 2 === 0) {
-        //     neighbors.reverse();
-        // }
+        if ((node.location.x + node.location.y) % 2 === 0) {
+            neighbors.reverse();
+        }
         return neighbors;
     }
 

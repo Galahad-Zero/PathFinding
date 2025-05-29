@@ -9,6 +9,7 @@ interface GridAreaProps {
     selectedStart: { x: number; y: number } | null;
     selectedGoal: { x: number; y: number } | null;
     path: Array<{ x: number; y: number }>;
+    foundPath: Array<{ x: number; y: number }>;
     pathFlowGraph: PathFlowGraph;
     showWeights: boolean;
     showPathFlow: boolean;
@@ -130,10 +131,32 @@ function renderFlow(
     }
 }
 
+// 绘制查找过的网格
+function renderFoundPath(
+    ctx: CanvasRenderingContext2D,
+    cellSize: number,
+    foundPath: Array<{ x: number; y: number }>
+): void {
+    if (foundPath.length <= 0) return;
+    for (const point of foundPath) {
+        ctx.fillStyle = 'rgba(33, 150, 243, 0.7)';
+        ctx.beginPath();
+        ctx.arc(
+            point.x * cellSize + 5,
+            point.y * cellSize + 5,
+            5,
+            0,
+            2 * Math.PI
+        );
+        ctx.fill();
+    }
+}
+
 function renderGraph(
     canvas: HTMLCanvasElement,
     renderInfo: RenderInfo,
     graph: Graph,
+    foundPath: Array<{ x: number; y: number }>,
     path: Array<{ x: number; y: number }>,
     pathFlowGraph: PathFlowGraph,
     selectedStart: { x: number; y: number } | null,
@@ -230,6 +253,8 @@ function renderGraph(
     renderPath(ctx, cellSize, path);
     // 绘制流向
     if (showPathFlow) renderFlow(ctx, cellSize, pathFlowGraph);
+    // 绘制查找过的网格
+    renderFoundPath(ctx, cellSize, foundPath);
 }
 
 export default function GridArea({
@@ -239,6 +264,7 @@ export default function GridArea({
     selectedStart,
     selectedGoal,
     path,
+    foundPath,
     pathFlowGraph,
     showWeights,
     showPathFlow,
@@ -340,6 +366,7 @@ export default function GridArea({
             canvas,
             renderInfo,
             graph,
+            foundPath,
             path,
             pathFlowGraph,
             selectedStart,
