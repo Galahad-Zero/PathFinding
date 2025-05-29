@@ -1,12 +1,15 @@
 {
     "name": "pathfind",
     "version": "1.0.0",
+    "homepage": "https://Galahad-Zero.github.io/PathFinding",
     "main": "./src/index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack --config webpack.config.js",
         "build:prod": "webpack --mode production",
-        "dev": "webpack serve --open"
+        "dev": "webpack serve --open",
+        "predeploy": "npm run build:prod",
+        "deploy": "gh-pages -d dist"
     },
     "keywords": [],
     "author": "",
@@ -31,6 +34,7 @@
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.25.0",
         "eslint-plugin-prettier": "^4.2.1",
+        "gh-pages": "^6.3.0",
         "prettier": "^2.8.0",
         "style-loader": "^4.0.0"
     }
