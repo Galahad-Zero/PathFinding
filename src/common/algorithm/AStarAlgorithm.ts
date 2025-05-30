@@ -12,7 +12,7 @@ export default class DijkstraAlgorithm extends Algorithm {
         const cameFrom: Record<string, string | null> = {
             [stringifyLocation(start)]: null,
         };
-        // 记录路径成本
+        // 记录路径成本  closedList:<nodeKey, cost(g)>
         const costSoFar: Record<string, number> = {
             [stringifyLocation(start)]: 0,
         };
@@ -26,7 +26,7 @@ export default class DijkstraAlgorithm extends Algorithm {
             if (!goalNode) {
                 throw new Error('Goal node not found: ' + goal);
             }
-            // 创建一个优先队列
+            // 创建一个优先队列  openList:<node, priority(f)>
             const frontier = new PriorityQueue<GraphNode>(true);
             // 将起点加入队列
             frontier.put(startNode, 0);
@@ -53,20 +53,21 @@ export default class DijkstraAlgorithm extends Algorithm {
                     // 如果邻居节点的移动成本小于0，视为不可通行，跳过
                     if (neighbor.cost < 0) continue;
                     // 计算新的路径成本，g(n)
-                    const newCost =
-                        costSoFar[currentNodeKey] +
-                        this.getHeuristic(current, neighbor.node);
+                    const newCost = costSoFar[currentNodeKey] + neighbor.cost;
                     // 获取当前节点的路径成本
                     const currentCost = costSoFar[neighborNodeKey];
                     // 如果当前节点没有路径，或者新的路径更短，则更新路径
                     if (!currentCost || newCost < currentCost) {
                         // 更新路径成本
                         costSoFar[neighborNodeKey] = newCost;
-                        // 更新优先级: 新的路径成本 + 距离目标成本，h(n)
+                        // 更新优先级: 新的路径成本 + 预估成本，f(n) = g(n) + h(n)
                         const priority =
                             newCost +
-                            this.getDistanceToGoal(neighbor.node, goal);
+                            this.getHeuristic(current, neighbor.node, goalNode);
                         // 将邻居节点加入队列
+                        // ps: 优先队列的put方法，会根据优先级排序。按照AStar的实现原理，
+                        // 队列中已存在neighbor，且优先级比当前优先级更高，则不更新队列；
+                        // 队列中已存在neighbor，且优先级比当前优先级更低，则更新队列。
                         frontier.put(neighbor.node, priority);
                         // 记录路径流向
                         cameFrom[neighborNodeKey] = currentNodeKey;
@@ -145,29 +146,39 @@ export default class DijkstraAlgorithm extends Algorithm {
         return pathFlowGraph;
     }
 
-    protected getHeuristic(node1: GraphNode, node2: GraphNode): number {
-        const { x, y } = node1.location;
-        // 移动成本
-        let moveCost = this.graph.getCost(node1, node2);
+    protected getHeuristic(
+        curNode: GraphNode,
+        nextNode: GraphNode,
+        goalNode: GraphNode
+    ): number {
+        const { x, y } = curNode.location;
+        const goal = goalNode.location;
+        // 预估成本, 曼哈顿距离
+        const h =
+            Math.abs(curNode.location.x - goal.x) +
+            Math.abs(curNode.location.y - goal.y);
+
+        // 移动偏移，优化路径表现
+        let moveH = 0;
         if ((x + y) % 2 === 0) {
-            // 如果node1到node2是水平移动，则cost+1
+            // 如果curNode到nextNode是水平移动，则cost+1
             if (
-                Math.abs(node1.location.x - node2.location.x) > 0 &&
-                node1.location.y === node2.location.y
+                Math.abs(curNode.location.x - nextNode.location.x) > 0 &&
+                curNode.location.y === nextNode.location.y
             ) {
-                moveCost += 0.5;
+                moveH += 1;
             }
         } else {
-            // 如果node1到node2是垂直移动，则cost+1
+            // 如果curNode到nextNode是垂直移动，则cost+1
             if (
-                Math.abs(node1.location.y - node2.location.y) > 0 &&
-                node1.location.x === node2.location.x
+                Math.abs(curNode.location.y - nextNode.location.y) > 0 &&
+                curNode.location.x === nextNode.location.x
             ) {
-                moveCost += 0.5;
+                moveH += 1;
             }
         }
 
-        return moveCost;
+        return h + moveH;
     }
 
     protected getDistanceToGoal(node: GraphNode, goal: Location): number {

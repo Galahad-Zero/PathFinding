@@ -385,7 +385,6 @@ export default function GridArea({
 
     return (
         <div className="grid-area">
-            <h2 className="panel-title">图形网格</h2>
             <div className="grid-container">
                 <canvas
                     ref={canvasRef}

@@ -92,7 +92,11 @@ export abstract class Algorithm {
      * @param node2 节点2
      * @returns 启发式值
      */
-    protected getHeuristic(node1: GraphNode, node2: GraphNode): number {
+    protected getHeuristic(
+        node1: GraphNode,
+        node2: GraphNode,
+        _goalNode?: GraphNode
+    ): number {
         return (
             Math.abs(node1.location.x - node2.location.x) +
             Math.abs(node1.location.y - node2.location.y)
