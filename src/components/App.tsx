@@ -190,23 +190,6 @@ export default function App(): JSX.Element {
         }
     }, [selectedStart, selectedGoal, graph, isAnimPath, currentAlgorithm]);
 
-    // React.useEffect(() => {
-    //     if (isAnimPath) {
-    //         if (animStep === -1) {
-    //             refreshPath();
-    //         } else if (animStep === Infinity) {
-    //             // 动画结束
-    //             setAnimStep(-1);
-    //         } else {
-    //             const algorithm = AlgorithmFactory.createAlgorithm(
-    //                 currentAlgorithm,
-    //                 graph
-    //             );
-    //             setFoundPath(algorithm.foundPath.map((node) => node.location));
-    //         }
-    //     }
-    // }, [animStep]);
-
     // 开始动画
     const beginAnimPath = () => {
         if (!selectedStart || !selectedGoal || !isAnimPath) {
