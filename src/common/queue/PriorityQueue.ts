@@ -50,4 +50,8 @@ export default class PriorityQueue<T> {
     size(): number {
         return this.items.length;
     }
+
+    clear(): void {
+        this.items = [];
+    }
 }

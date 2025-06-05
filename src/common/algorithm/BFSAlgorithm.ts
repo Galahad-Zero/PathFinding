@@ -1,11 +1,50 @@
 import { stringifyLocation } from '../graph/Graph';
-import { Algorithm, PathFlowGraph } from './Algorithm';
+import { Algorithm, AlgorithmTask, PathFlowGraph } from './Algorithm';
 import { GraphNode, Location, LocationIsEqual } from '../graph/GraphTypes';
 import Queue from '../queue/Queue';
 
 export default class BFSAlgorithm extends Algorithm {
     protected algorithmInfo: string =
         'BFS算法（广度优先搜索）：不考虑移动成本，只考虑距离。';
+
+    runAlgorithmTask(task: AlgorithmTask): void {
+        const { startNode, goalNode, cameFrom, frontier } = task;
+        if (!frontier.isEmpty()) {
+            // 从队列中取出第一个节点
+            const current = frontier.get();
+            if (!current) {
+                throw new Error('Current node not found');
+            } else if (LocationIsEqual(current.location, goalNode.location)) {
+                // 如果当前节点是目标节点，则退出
+                frontier.clear();
+                return;
+            }
+            this.foundPath.push(current);
+            const neighbors = this.graph.getNeighbors(current);
+            for (const neighbor of neighbors) {
+                // 跳过权重大于1的邻居
+                const cost = neighbor.edges.some((edge) => edge.cost > 1);
+                if (cost) {
+                    continue;
+                }
+                // 获取邻居节点的位置
+                const neighborLocation = neighbor.location;
+                // 将位置转换为字符串作为键
+                const neighborKey = stringifyLocation(neighborLocation);
+                // 如果邻居节点已经在路径中，则跳过
+                if (cameFrom[neighborKey]) {
+                    continue;
+                }
+                // 记录邻居节点的路径
+                cameFrom[neighborKey] = stringifyLocation(current.location);
+                // 将邻居节点加入队列以继续搜索
+                (frontier as Queue<GraphNode>).put(neighbor);
+            }
+        } else {
+            const path = this.backtrackPath(cameFrom, startNode, goalNode);
+            task.nearestPath = path;
+        }
+    }
 
     findNearestPath(start: Location, goal: Location): GraphNode[] {
         const cameFrom: Record<string, string | null> = {
@@ -22,12 +61,12 @@ export default class BFSAlgorithm extends Algorithm {
                 throw new Error('Goal node not found: ' + goal);
             }
             // 创建一个队列并将起始节点加入队列
-            const queue: Queue<GraphNode> = new Queue();
-            queue.put(startNode);
+            const frontier: Queue<GraphNode> = new Queue();
+            frontier.put(startNode);
             // 使用广度优先搜索遍历图
-            while (!queue.isEmpty()) {
+            while (!frontier.isEmpty()) {
                 // 从队列中取出第一个节点
-                const current = queue.get();
+                const current = frontier.get();
                 if (!current) {
                     throw new Error('Current node not found');
                 } else if (LocationIsEqual(current.location, goal)) {
@@ -35,9 +74,7 @@ export default class BFSAlgorithm extends Algorithm {
                     break;
                 }
                 this.foundPath.push(current);
-
                 const neighbors = this.graph.getNeighbors(current);
-
                 for (const neighbor of neighbors) {
                     // 跳过权重大于1的邻居
                     const cost = neighbor.edges.some((edge) => edge.cost > 1);
@@ -55,7 +92,7 @@ export default class BFSAlgorithm extends Algorithm {
                     // 记录邻居节点的路径
                     cameFrom[neighborKey] = stringifyLocation(current.location);
                     // 将邻居节点加入队列以继续搜索
-                    queue.put(neighbor);
+                    frontier.put(neighbor);
                 }
             }
 

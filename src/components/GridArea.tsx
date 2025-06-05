@@ -139,12 +139,12 @@ function renderFoundPath(
 ): void {
     if (foundPath.length <= 0) return;
     for (const point of foundPath) {
-        ctx.fillStyle = 'rgba(33, 150, 243, 0.7)';
+        ctx.fillStyle = 'rgba(33, 150, 243, 0.5)';
         ctx.beginPath();
         ctx.arc(
-            point.x * cellSize + 5,
-            point.y * cellSize + 5,
-            5,
+            point.x * cellSize + 10,
+            point.y * cellSize + 10,
+            10,
             0,
             2 * Math.PI
         );
@@ -381,6 +381,7 @@ export default function GridArea({
         showWeights,
         showPathFlow,
         graph,
+        foundPath,
     ]);
 
     return (

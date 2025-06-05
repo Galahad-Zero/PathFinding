@@ -53,9 +53,25 @@
 /* 控制项样式 */
 .control-item {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 10px;
     padding: 8px 0;
+}
+
+.control-item button {
+    width: 100%;
+    height: 50px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.control-item button:hover {
+    background-color: #f0f0f0;
 }
 
 /* 信息项样式 */

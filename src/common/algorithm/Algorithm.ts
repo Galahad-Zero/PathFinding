@@ -1,5 +1,7 @@
 import { Graph, parseLocation, stringifyLocation } from '../graph/Graph';
 import { GraphNode, Location } from '../graph/GraphTypes';
+import PriorityQueue from '../queue/PriorityQueue';
+import Queue from '../queue/Queue';
 
 /**
  * 路径流向图
@@ -8,6 +10,15 @@ import { GraphNode, Location } from '../graph/GraphTypes';
  * 以Location为value，表示源节点的坐标
  */
 export type PathFlowGraph = Map<string, Location>;
+
+export interface AlgorithmTask {
+    startNode: GraphNode;
+    goalNode: GraphNode;
+    nearestPath: GraphNode[];
+    cameFrom: Record<string, string | null>;
+    costSoFar: Record<string, number>;
+    frontier: PriorityQueue<GraphNode> | Queue<GraphNode>;
+}
 
 /**
  * 算法抽象类
@@ -19,6 +30,45 @@ export abstract class Algorithm {
 
     // 绑定图
     constructor(protected graph: Graph) {}
+
+    /**
+     * 获取算法任务
+     * @param start 起点
+     * @param goal 终点
+     * @param withPriorityQueue 是否使用优先队列
+     * @returns 算法任务
+     */
+    static getAlgorithmTask(
+        start: Location,
+        goal: Location,
+        graph: Graph,
+        withPriorityQueue: boolean = false
+    ): AlgorithmTask {
+        const frontier = withPriorityQueue
+            ? new PriorityQueue<GraphNode>(true)
+            : new Queue<GraphNode>();
+        const startNode = graph.getNode(start);
+        if (!startNode) {
+            throw new Error('Start node not found: ' + start);
+        }
+        const goalNode = graph.getNode(goal);
+        if (!goalNode) {
+            throw new Error('Goal node not found: ' + goal);
+        }
+        if (frontier instanceof PriorityQueue) {
+            frontier.put(startNode, 0);
+        } else {
+            frontier.put(startNode);
+        }
+        return {
+            startNode,
+            goalNode,
+            nearestPath: [],
+            cameFrom: { [stringifyLocation(start)]: null },
+            costSoFar: { [stringifyLocation(start)]: 0 },
+            frontier,
+        };
+    }
 
     /**
      * 获取算法描述
@@ -70,6 +120,13 @@ export abstract class Algorithm {
         console.log('path: ', path);
         return path;
     }
+
+    /**
+     * 查找路径
+     * @param task 任务
+     * @returns 任务
+     */
+    abstract runAlgorithmTask(task: AlgorithmTask): void;
 
     /**
      * 查找路径

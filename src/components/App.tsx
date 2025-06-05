@@ -4,10 +4,12 @@ import InfoPanel from './InfoPanel';
 import ControlPanel from './ControlPanel';
 import { Graph } from '../common/graph/Graph';
 import { GraphNode } from '../common/graph/GraphTypes';
-import { PathFlowGraph } from '../common/algorithm/Algorithm';
+import { Algorithm, PathFlowGraph } from '../common/algorithm/Algorithm';
 import { AlgorithmFactory, AlgorithmType } from '../common/algorithm';
 
 import '../styles/App.css';
+
+let timeoutId: number | null = null;
 
 function getInitGraph(width: number, height: number): Graph {
     const graph = new Graph();
@@ -69,6 +71,9 @@ export default function App(): JSX.Element {
         y: number;
     } | null>(null);
     const [path, setPath] = React.useState<Array<{ x: number; y: number }>>([]);
+
+    const [isAnimPath, setIsAnimPath] = React.useState(false);
+
     const [foundPath, setFoundPath] = React.useState<
         Array<{ x: number; y: number }>
     >([]);
@@ -172,9 +177,80 @@ export default function App(): JSX.Element {
     };
 
     React.useEffect(() => {
-        // 当起点和终点都选择后，计算路径
+        // 如果动画开启，则不计算路径
+        if (isAnimPath) {
+            // 清除之前的动画
+            timeoutId && clearTimeout(timeoutId);
+            setPath([]);
+            setFoundPath([]);
+            setPathFlowGraph(new Map());
+        } else {
+            // 当起点和终点都选择后，计算路径
+            refreshPath();
+        }
+    }, [selectedStart, selectedGoal, graph, isAnimPath, currentAlgorithm]);
+
+    // React.useEffect(() => {
+    //     if (isAnimPath) {
+    //         if (animStep === -1) {
+    //             refreshPath();
+    //         } else if (animStep === Infinity) {
+    //             // 动画结束
+    //             setAnimStep(-1);
+    //         } else {
+    //             const algorithm = AlgorithmFactory.createAlgorithm(
+    //                 currentAlgorithm,
+    //                 graph
+    //             );
+    //             setFoundPath(algorithm.foundPath.map((node) => node.location));
+    //         }
+    //     }
+    // }, [animStep]);
+
+    // 开始动画
+    const beginAnimPath = () => {
+        if (!selectedStart || !selectedGoal || !isAnimPath) {
+            return;
+        }
+        const task = Algorithm.getAlgorithmTask(
+            selectedStart,
+            selectedGoal,
+            graph,
+            currentAlgorithm !== AlgorithmType.BFS
+        );
+        const algorithm = AlgorithmFactory.createAlgorithm(
+            currentAlgorithm,
+            graph
+        );
+        algorithm.foundPath = [];
+        // 清除之前的动画
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        // 开始动画
+        const nextStep = () => {
+            algorithm.runAlgorithmTask(task);
+            setFoundPath(algorithm.foundPath.map((node) => node.location));
+            if (task.frontier.isEmpty()) {
+                timeoutId = null;
+                refreshPath();
+            } else {
+                timeoutId = setTimeout(() => {
+                    nextStep();
+                }, 30);
+            }
+        };
+        nextStep();
+        setPathFlowGraph(new Map());
+    };
+
+    // 结束动画, 直接显示结果
+    const endAnimPath = () => {
+        // 清除之前的动画
+        timeoutId && clearTimeout(timeoutId);
         refreshPath();
-    }, [selectedStart, selectedGoal, graph, currentAlgorithm]);
+    };
 
     return (
         <div className="app-container">
@@ -185,6 +261,10 @@ export default function App(): JSX.Element {
                 onShowPathFlowChange={setShowPathFlow}
                 currentAlgorithm={currentAlgorithm}
                 onCurrentAlgorithmChange={setCurrentAlgorithm}
+                isAnimPath={isAnimPath}
+                onIsAnimPathChange={setIsAnimPath}
+                onBeginAnimPath={beginAnimPath}
+                onEndAnimPath={endAnimPath}
             />
             <GridArea
                 graph={graph}

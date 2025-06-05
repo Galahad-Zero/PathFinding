@@ -8,6 +8,10 @@ interface ControlPanelProps {
     onShowPathFlowChange: (show: boolean) => void;
     currentAlgorithm: AlgorithmType;
     onCurrentAlgorithmChange: (algorithm: AlgorithmType) => void;
+    isAnimPath: boolean;
+    onIsAnimPathChange: (isAnimPath: boolean) => void;
+    onBeginAnimPath: () => void;
+    onEndAnimPath: () => void;
 }
 
 export default function ControlPanel({
@@ -17,6 +21,10 @@ export default function ControlPanel({
     onShowPathFlowChange,
     currentAlgorithm,
     onCurrentAlgorithmChange,
+    isAnimPath,
+    onIsAnimPathChange,
+    onBeginAnimPath,
+    onEndAnimPath,
 }: ControlPanelProps): JSX.Element {
     const allAlgorithms = Object.values(AlgorithmType);
     return (
@@ -44,6 +52,16 @@ export default function ControlPanel({
                         />
                         流向图
                     </label>
+                    <label className="control-label">
+                        <input
+                            type="checkbox"
+                            checked={isAnimPath}
+                            onChange={(e) =>
+                                onIsAnimPathChange(e.target.checked)
+                            }
+                        />
+                        动画
+                    </label>
                 </div>
                 <div className="control-item">
                     <label className="control-label">
@@ -63,6 +81,18 @@ export default function ControlPanel({
                             ))}
                         </select>
                     </label>
+                    <button
+                        onClick={onBeginAnimPath}
+                        style={{ display: !isAnimPath ? 'none' : 'block' }}
+                    >
+                        开始动画
+                    </button>
+                    <button
+                        onClick={onEndAnimPath}
+                        style={{ display: !isAnimPath ? 'none' : 'block' }}
+                    >
+                        结束动画
+                    </button>
                 </div>
             </div>
         </div>
