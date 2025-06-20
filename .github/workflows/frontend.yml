@@ -1,0 +1,119 @@
+name: Frontend CI/CD
+
+# CI/CD触发条件
+on:
+    push:
+        # 目标分支，当push到main或develop分支时，触发CI/CD
+        branches: [main, develop]
+    pull_request:
+        # 当有pull request到main分支时，触发CI/CD
+        branches: [main]
+
+# 并行执行的job
+jobs:
+    # 代码格式检查、TypeScript 类型检查、运行测试
+    lint-and-test:
+        name: 代码格式检查和测试
+        # 使用ubuntu-latest作为运行环境，并行执行
+        runs-on: ubuntu-latest
+        # 使用并行组，当有其他并行组在运行时，取消当前并行组，避免资源浪费
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.ref }}
+            cancel-in-progress: true
+        # 定义任务步骤
+        steps:
+            # 检出代码
+            - name: 🔄 检出代码
+              uses: actions/checkout@v4
+
+            # 设置 Node.js
+            - name: 🟢 设置 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+                  cache: 'npm'
+
+            # 安装 pnpm
+            - name: 📦 安装 pnpm
+              run: npm install -g pnpm
+
+            # 缓存 pnpm 依赖
+            - name: 💾 缓存 pnpm 依赖
+              uses: actions/cache@v3
+              with:
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            # 安装依赖
+            - name: 📥 安装依赖
+              run: pnpm install
+
+            # 代码格式检查
+            - name: 📝 代码格式检查
+              run: pnpm run lint
+
+            # TypeScript 类型检查
+            - name: 🔍 TypeScript 类型检查
+              run: pnpm run type-check
+
+            # 运行测试
+            - name: 🧪运行测试
+              run: pnpm run test
+              continue-on-error: true
+
+            # 构建项目
+            - name: 🏗️ 构建项目
+              run: pnpm run build:prod
+
+            # 上传构建产物
+            - name: 📤 上传构建产物
+              uses: actions/upload-artifact@v3
+              with:
+                  name: dist
+                  path: dist/
+
+    # 部署
+    deploy:
+        name: 部署到 GitHub Pages
+        # 依赖 lint-and-test 任务
+        needs: lint-and-test
+        # 使用ubuntu-latest作为运行环境，并行执行
+        runs-on: ubuntu-latest
+        # 当github.ref为main分支时，执行部署，并行执行
+        if: github.ref == 'refs/heads/main'
+
+        steps:
+            - name: 🔄 检出代码
+              uses: actions/checkout@v4
+
+            - name: 🟢 设置 Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+                  cache: 'npm'
+
+            - name: 📦 安装 pnpm
+              run: npm install -g pnpm
+
+            - name: 💾 缓存 pnpm 依赖
+              uses: actions/cache@v3
+              with:
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
+
+            - name: 📥 安装依赖
+              run: pnpm install
+
+            - name: 🏗️ 构建生产版本
+              run: pnpm run build:prod
+
+            - name: 🚀 部署到 GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  cname: ${{ secrets.CUSTOM_DOMAIN }}
