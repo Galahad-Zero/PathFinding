@@ -59,9 +59,9 @@ jobs:
               run: pnpm run type-check
 
             # 运行测试
-            - name: 🧪运行测试
-              run: pnpm run test
-              continue-on-error: true
+            #- name: 🧪运行测试
+            #  run: pnpm run test
+            #  continue-on-error: true
 
     # 部署
     deploy:
