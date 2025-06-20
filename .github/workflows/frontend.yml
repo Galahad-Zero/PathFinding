@@ -9,6 +9,15 @@ on:
         # 当有pull request到main分支时，触发CI/CD
         branches: [main]
 
+# 添加必要的权限配置
+permissions:
+    # 读取仓库内容
+    contents: read
+    # 写入仓库内容
+    pages: write
+    # 写入仓库内容
+    id-token: write
+
 # 并行执行的job
 jobs:
     # 代码格式检查、TypeScript 类型检查、运行测试
@@ -73,6 +82,20 @@ jobs:
         # 当github.ref为main分支时，执行部署，并行执行
         if: github.ref == 'refs/heads/main'
 
+        # 添加必要的权限配置
+        permissions:
+            # 读取仓库内容
+            contents: read
+            # 写入仓库内容
+            pages: write
+            # 写入仓库内容
+            id-token: write
+
+        # 设置并发组，确保只有一个部署任务在运行
+        concurrency:
+            group: 'pages'
+            cancel-in-progress: false
+
         steps:
             - name: 🔄 检出代码
               uses: actions/checkout@v4
@@ -100,9 +123,14 @@ jobs:
             - name: 🏗️ 构建生产版本
               run: pnpm run build:prod
 
-            - name: 🚀 部署到 GitHub Pages
-              uses: peaceiris/actions-gh-pages@v3
+            - name: 📄 设置 Pages
+              uses: actions/configure-pages@v5
+
+            - name: 📤 上传构建产物
+              uses: actions/upload-pages-artifact@v3
               with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./dist
-                  cname: ${{ secrets.CUSTOM_DOMAIN }}
+                  path: ./dist
+
+            - name: 🚀 部署到 GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
