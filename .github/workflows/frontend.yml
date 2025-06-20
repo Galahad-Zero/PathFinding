@@ -63,17 +63,6 @@ jobs:
               run: pnpm run test
               continue-on-error: true
 
-            # 构建项目
-            - name: 🏗️ 构建项目
-              run: pnpm run build:prod
-
-            # 上传构建产物
-            - name: 📤 上传构建产物
-              uses: actions/upload-artifact@v3
-              with:
-                  name: dist
-                  path: dist/
-
     # 部署
     deploy:
         name: 部署到 GitHub Pages
